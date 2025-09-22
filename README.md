@@ -33,7 +33,7 @@ Make reinforcement learning approachable:
 
 * Current policy (best move per cell)
 * Training progress (reward curves)
-  * ✅ Optional extras: moving traps, multiple treat types, or “levels”
+* ✅ Optional extras: moving traps, multiple treat types, or “levels”
 
 ---
 
