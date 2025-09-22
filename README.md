@@ -12,7 +12,7 @@ The pet begins clueless, wandering randomly, but through trial-and-error it lear
 * **Project Type:** New Project
 * **Difficulty:** Intermediate
 * **Domain:** Reinforcement Learning, Algorithms, Game Simulation
-* **Time Commitment:** \~8–10 hrs/week
+* **Time Commitment:** ~8–10 hrs/week
 * **Communication Platform:** Discord
 
 ---
