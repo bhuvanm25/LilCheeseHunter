@@ -80,7 +80,7 @@ Make reinforcement learning approachable:
 * [Spinning Up: Intro to RL](https://spinningup.openai.com/en/latest/spinningup/rl_intro.html)
 * [Q-Learning from Scratch (tutorial)](https://www.learndatasci.com/tutorials/reinforcement-q-learning-scratch-python-openai-gym/)
 * [OpenAI Gym FrozenLake](https://www.gymlibrary.dev/environments/toy_text/frozen_lake/)
-* [Q-Learning Explained (video)](https://www.youtube.com/watch?v=qhRNvCVVJaA)&#x20;
+* [Q-Learning Explained (video)](https://www.youtube.com/watch?v=qhRNvCVVJaA)
 * [Project Reference Document](https://github.com/bhuvanm25/treatquest/blob/main/TreatQuest%20Fall%202025%20Cohort%20-%20Onboarding.pdf)
 
 ---
