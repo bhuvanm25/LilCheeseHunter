@@ -85,6 +85,21 @@ Make reinforcement learning approachable:
 
 ---
 
+## Join the Team! 🚀
+
+**Want to contribute to TreatQuest?** We need your GitHub username to add you to the project!
+
+### How to Get Access:
+
+1. **Quick Option:** [Submit your GitHub username via Issue](https://github.com/bhuvanm25/treatquest/issues/new?template=github-username.md)
+2. **Alternative:** Add yourself to [CONTRIBUTORS.md](CONTRIBUTORS.md) via pull request
+
+### Current Contributors
+
+See our growing team in [CONTRIBUTORS.md](CONTRIBUTORS.md)
+
+---
+
 ## Contact
 
 📧 **Prototyp3 Team** – [prototyp3.org@gmail.com](mailto:prototyp3.org@gmail.com)

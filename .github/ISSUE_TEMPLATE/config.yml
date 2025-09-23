@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 📧 Email Support
+    url: mailto:prototyp3.org@gmail.com
+    about: Contact the Prototyp3 team directly for urgent matters
+  - name: 📝 Contributors Guide
+    url: https://github.com/bhuvanm25/treatquest/blob/main/CONTRIBUTORS.md
+    about: Learn how to add yourself to the project contributors list
