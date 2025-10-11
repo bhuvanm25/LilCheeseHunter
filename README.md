@@ -82,6 +82,7 @@ Make reinforcement learning approachable:
 * [OpenAI Gym FrozenLake](https://www.gymlibrary.dev/environments/toy_text/frozen_lake/)
 * [Q-Learning Explained (video)](https://www.youtube.com/watch?v=qhRNvCVVJaA)
 * [Project Reference Document](https://github.com/bhuvanm25/treatquest/blob/main/TreatQuest%20Fall%202025%20Cohort%20-%20Onboarding.pdf)
+* [deeplizerd](https://deeplizard.com/learn/video/nyjbcRQ-uQ8)
 
 ---
 
