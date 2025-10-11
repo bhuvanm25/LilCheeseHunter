@@ -30,6 +30,7 @@ NOIVA'S BRANCH
 
 ## Learning Resources
 
+* [Deep Lizard: Reinforcement Learning - Developing Intelligent Agents](https://deeplizard.com/learn/video/nyjbcRQ-uQ8)
 * [Spinning Up: Intro to RL](https://spinningup.openai.com/en/latest/spinningup/rl_intro.html)
 * [Q-Learning from Scratch (tutorial)](https://www.learndatasci.com/tutorials/reinforcement-q-learning-scratch-python-openai-gym/)
 * [OpenAI Gym FrozenLake](https://www.gymlibrary.dev/environments/toy_text/frozen_lake/)
