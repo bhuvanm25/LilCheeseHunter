@@ -81,9 +81,9 @@ Make reinforcement learning approachable:
 * [Q-Learning from Scratch (tutorial)](https://www.learndatasci.com/tutorials/reinforcement-q-learning-scratch-python-openai-gym/)
 * [OpenAI Gym FrozenLake](https://www.gymlibrary.dev/environments/toy_text/frozen_lake/)
 * [Project Reference Document](https://github.com/bhuvanm25/treatquest/blob/main/TreatQuest%20Fall%202025%20Cohort%20-%20Onboarding.pdf)
-  
-* 👉[deeplizerd](https://deeplizard.com/learn/video/nyjbcRQ-uQ8)👈
-
+* [deeplizerd](https://deeplizard.com/learn/video/nyjbcRQ-uQ8)
+* 
+* [MAIN](https://huggingface.co/learn/deep-rl-course/unit0/introduction)
 ---
 
 ## Contact
