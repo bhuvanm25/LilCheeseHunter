@@ -23,17 +23,19 @@ NOIVA'S BRANCH
 * Python 3.10+ (recommend Anaconda)
 * NumPy (math & arrays)
 * Matplotlib (plot learning curves)
-* Optional graphics:
 
+* Optional graphics:
   * Pygame (2D visualization)
   * Tkinter Canvas (bundled with Python)
 
 ## Learning Resources
 
+* [Create a Custom Environment - Gymnasium Library](https://gymnasium.farama.org/introduction/create_custom_env/)
+* [Gymnasium - Frozen Lake](https://gymnasium.farama.org/environments/toy_text/frozen_lake/)
+* [Gymnasium - Taxi](https://gymnasium.farama.org/environments/toy_text/taxi/)
 * [Deep Lizard: Reinforcement Learning - Developing Intelligent Agents](https://deeplizard.com/learn/video/nyjbcRQ-uQ8)
 * [Spinning Up: Intro to RL](https://spinningup.openai.com/en/latest/spinningup/rl_intro.html)
 * [Q-Learning from Scratch (tutorial)](https://www.learndatasci.com/tutorials/reinforcement-q-learning-scratch-python-openai-gym/)
-* [OpenAI Gym FrozenLake](https://www.gymlibrary.dev/environments/toy_text/frozen_lake/)
 * [Q-Learning Explained (video)](https://www.youtube.com/watch?v=qhRNvCVVJaA)
 * [Project Reference Document](https://github.com/bhuvanm25/treatquest/blob/main/TreatQuest%20Fall%202025%20Cohort%20-%20Onboarding.pdf)
 
