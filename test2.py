@@ -93,6 +93,8 @@ for episode in range(num_episodes):
 
     done = False    # Boolean flag to check if should terminate training
 
+    print('Episode', episode)
+
     # Loop to max # steps agent can take per episode
     for step in range(max_steps):
         
@@ -121,6 +123,8 @@ for episode in range(num_episodes):
 
         # Checks done or truncated conditions
         if (done or truncated):
+
+            print('Finished episode', episode, 'with reward', reward)
             break
 
     # Updates epsilon value at end of episode
