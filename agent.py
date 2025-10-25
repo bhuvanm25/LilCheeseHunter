@@ -7,5 +7,5 @@ class RandomAgent:
         self.rng = random.Random(seed)
 
     def act(self, state):
-        """Ignore state and pick a random action."""
+        #Ignore state and pick a random action.
         return self.rng.choice(ACTIONS)
