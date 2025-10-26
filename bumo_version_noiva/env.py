@@ -2,6 +2,7 @@
 import random
 import gymnasium as gym
 import numpy as np
+import math
 
 WALL  = '⬛'
 EMPTY = '🟥'
@@ -37,9 +38,10 @@ class GridWorld(gym.Env):
 
         # MY TESTING WITH GYMNASIUM
 
-        num_states = size * size
+        num_states = size * size    # for now, may change later as game becomes more complex
         num_actions = 4
 
+        # dictionary that maps each state to an action
         self.P = {
             state: {action: [] for action in range(num_actions)}
             for state in range(num_states)
@@ -50,20 +52,6 @@ class GridWorld(gym.Env):
 
         # Define what actions are available (4 directions)
         self.action_space = gym.spaces.Discrete(num_actions)
-
-        # Initialize positions - will be set randomly in reset()
-        # Using -1,-1 as "uninitialized" state
-        # self._agent_location = np.array([-1, -1], dtype=np.int32)
-        # self._target_location = np.array([-1, -1], dtype=np.int32)
-
-        # Map action numbers to actual movements on the grid
-        # This makes the code more readable than using raw numbers
-        # self._action_to_direction = {
-        #     0: np.array([1, 0]),   # Move right (positive x)
-        #     1: np.array([0, 1]),   # Move up (positive y)
-        #     2: np.array([-1, 0]),  # Move left (negative x)
-        #     3: np.array([0, -1]),  # Move down (negative y)
-        # }
 
     def _make_box(self, rows, cols):
 
@@ -76,23 +64,23 @@ class GridWorld(gym.Env):
                 else:
                     row.append(EMPTY)
             grid.append(row)
+
         return grid
 
-    # NEED TO COMPLETE THIS IMPLEMENTATION
     def reset(self):
 
-        """Place the agent at a random empty cell inside the box."""
-        empties = [(r, c)
-                   for r in range(1, self.rows - 1)
-                   for c in range(1, self.cols - 1)]
-        self.agent_pos = self.rng.choice(empties)
+        # Force the agent to spawn at top-left corner (1,1)
+        self.agent_pos = (1, 1)
 
-        return self.agent_pos
+        # Place treat at bottom-right corner (rows-2, cols-2)
+        self.treat_pos = (self.rows - 2, self.cols - 2)
+
+        return self.agent_pos, self.coord_to_state(self.agent_pos)
 
     # NEED TO COMPLETE THIS IMPLEMENTATION
     def step(self, action):
-
-        """Move agent one step if not blocked by a wall (stays put if blocked)."""
+        
+        # Move agent one step if not blocked by a wall (stays put if blocked).
         dr, dc = DELTAS[action]
         r, c = self.agent_pos
         nr, nc = r + dr, c + dc
@@ -101,16 +89,40 @@ class GridWorld(gym.Env):
         if self.grid[nr][nc] != WALL:
             self.agent_pos = (nr, nc)
 
-        # for now, no rewards/termination; return next state
-        return self.agent_pos
+        # at cheese?
+        done = (self.agent_pos == self.treat_pos)
+
+        #reward
+        # +1 if cheese found
+        # -0.01 each step
+        if done:
+            reward = 100
+        else:
+            reward = -1
+
+        return self.agent_pos, reward, done
 
     def render(self):
-        """Print grid with agent overlaid."""
         for r in range(self.rows):
             line = []
             for c in range(self.cols):
                 if (r, c) == self.agent_pos:
                     line.append(AGENT)
+                elif (r, c) == getattr(self, 'treat_pos', None):
+                    line.append(TREAT)
                 else:
                     line.append(self.grid[r][c])
             print(" ".join(line))
+
+    def coord_to_state(self, agent_pos):
+        
+        r, c = agent_pos
+
+        r -= 1
+        c -= 1
+
+        a = (r * (self.cols - 2)) + c
+
+        print(f"State index: {a}")      # TESTING
+
+        return a
