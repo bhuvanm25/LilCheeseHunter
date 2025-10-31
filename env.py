@@ -8,7 +8,10 @@ EMPTY = '🟥'
 AGENT = '🐭'               # jerry
 TREAT = '🧀'               # cheese
 MOVING_TRAP = '😾'         # tom
-STATIC_TRAP = '🪤'          # mouse trap
+# STATIC_TRAP = '🪤'          # mouse trap
+# TRAPS!!!#!&!%&^$(!#&^$(@#))
+STATIC_TRAP = '💀' # 5 total!!!!
+
 POISON_TRAP = '🍇'         # mouse poison
 
 # Actions agent can choose to take
@@ -75,7 +78,15 @@ class GridWorld(gym.Env):
         self.treat_pos = (self.rows - 2, self.cols - 2)
 
         # Place trap at around middle of grid
-        self.static_trap_pos = (3, 3)
+        self.static_trap1_pos = (2, 1)
+        self.static_trap2_pos = (2, 2)
+        self.static_trap3_pos = (2, 3)
+        self.static_trap4_pos = (2, 4)
+
+        self.static_trap5_pos = (4, 2)
+        self.static_trap6_pos = (4, 3)
+        self.static_trap7_pos = (4, 4)
+        self.static_trap8_pos = (4, 5)
 
         return self.agent_pos, self.coord_to_state(self.agent_pos)
 
@@ -91,14 +102,13 @@ class GridWorld(gym.Env):
             self.agent_pos = (nr, nc)
 
         # at trap or cheese;
-        done = (self.agent_pos == self.treat_pos) or (self.agent_pos == self.static_trap_pos)
+        done = (self.agent_pos == self.treat_pos) or (self.agent_pos == self.static_trap1_pos) or (self.agent_pos == self.static_trap2_pos) or (self.agent_pos == self.static_trap3_pos) or (self.agent_pos == self.static_trap4_pos) or (self.agent_pos == self.static_trap5_pos) or (self.agent_pos == self.static_trap6_pos) or (self.agent_pos == self.static_trap7_pos) or (self.agent_pos == self.static_trap8_pos)
         # At trap or cheese
         if done:
             if (self.agent_pos == self.treat_pos):
                 dead = False
-            elif (self.agent_pos == self.static_trap_pos):
+            elif (self.agent_pos == self.static_trap1_pos) or (self.agent_pos == self.static_trap2_pos) or (self.agent_pos == self.static_trap3_pos) or (self.agent_pos == self.static_trap4_pos) or (self.agent_pos == self.static_trap5_pos) or (self.agent_pos == self.static_trap6_pos) or (self.agent_pos == self.static_trap7_pos) or (self.agent_pos == self.static_trap8_pos):
                 dead = True
-
 
         #reward
         # +100 if cheese found
@@ -127,7 +137,7 @@ class GridWorld(gym.Env):
                     line.append(AGENT)
                 elif (r, c) == getattr(self, 'treat_pos', None):
                     line.append(TREAT)
-                elif (r, c) == getattr(self, 'static_trap_pos', None):           # TESTING
+                elif (r, c) == getattr(self, 'static_trap1_pos', None) or (r, c) == getattr(self, 'static_trap2_pos', None) or (r, c) == getattr(self, 'static_trap3_pos', None) or (r, c) == getattr(self, 'static_trap4_pos', None) or (r, c) == getattr(self, 'static_trap5_pos', None) or (r, c) == getattr(self, 'static_trap6_pos', None) or (r, c) == getattr(self, 'static_trap7_pos', None) or (r, c) == getattr(self, 'static_trap8_pos', None):           # TESTING
                     line.append(STATIC_TRAP)
                 else:
                     line.append(self.grid[r][c])
