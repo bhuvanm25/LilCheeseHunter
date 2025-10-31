@@ -8,7 +8,8 @@ EMPTY = '🟥'
 AGENT = '🐭'               # jerry
 TREAT = '🧀'               # cheese
 MOVING_TRAP = '😾'         # tom
-STATIC_TRAP ='🪤'          # mouse trap
+MOUSE_TRAP = '🪤'          # mouse trap
+POISON_TRAP = '🍇'         # mouse poison
 
 # Actions agent can choose to take
 ACTIONS = ['UP', 'DOWN', 'LEFT', 'RIGHT']
@@ -36,7 +37,6 @@ class GridWorld(gym.Env):
         self.agent_pos = None  # (r, c)
 
         # MY TESTING WITH GYMNASIUM
-
         num_states = size * size    # for now, may change later as game becomes more complex
         num_actions = 4
 
@@ -74,9 +74,11 @@ class GridWorld(gym.Env):
         # Place treat at bottom-right corner (rows-2, cols-2)
         self.treat_pos = (self.rows - 2, self.cols - 2)
 
+        # Place trap at around middle of grid
+        self.trap_pos = (3, 3)
+
         return self.agent_pos, self.coord_to_state(self.agent_pos)
 
-    # NEED TO COMPLETE THIS IMPLEMENTATION
     def step(self, action):
         
         # Move agent one step if not blocked by a wall (stays put if blocked).
@@ -91,26 +93,40 @@ class GridWorld(gym.Env):
         # at cheese?
         done = (self.agent_pos == self.treat_pos)
 
+        # hit trap?
+        hit_trap = (self.agent_pos == self.trap_pos)
+
         #reward
-        # +1 if cheese found
-        # -0.01 each step
+        # +100 if cheese found
+        # -1 each step
+        # -25 for hitting trap
+
         if done:
             reward = 100
+        elif hit_trap:          # TESTING
+            reward = -25
         else:
             reward = -1
 
         return self.agent_pos, reward, done
 
     def render(self):
+
         for r in range(self.rows):
+
             line = []
+
             for c in range(self.cols):
+
                 if (r, c) == self.agent_pos:
                     line.append(AGENT)
                 elif (r, c) == getattr(self, 'treat_pos', None):
                     line.append(TREAT)
+                elif (r, c) == getattr(self, 'trap_pos', None):           # TESTING
+                    line.append(POISON_TRAP)
                 else:
                     line.append(self.grid[r][c])
+
             print(" ".join(line))
 
     def coord_to_state(self, agent_pos):

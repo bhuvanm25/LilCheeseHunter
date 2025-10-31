@@ -2,12 +2,9 @@
 import os
 import time
 from env import GridWorld
-from env import ACTIONS
 from agent import RandomAgent
 
-import gymnasium as gym
 import numpy as np
-import random
 
 def clear():
     # clears the console screen each time its called 
