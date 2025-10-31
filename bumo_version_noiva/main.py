@@ -14,38 +14,6 @@ def clear():
     # this makes the console cleaner
     os.system('cls' if os.name == 'nt' else 'clear')
 
-# Chooses action depending on given state
-def choose_action(env, agent, state, state_index, q_table, epsilon):
-
-    # Generates random value to see what action to take
-
-    # If random value generated is less than epsilon, take random action
-    if (random.uniform(0, 1) < epsilon):
-
-        # gets random action (repeatable sequence of random actions)
-        # rand_action = agent.act(state)
-        # action_index = ACTIONS.index(rand_action)
-
-        print("Random action")
-
-        action_index = env.action_space.sample()
-        rand_action = ACTIONS[action_index]
-
-        return rand_action, action_index
-    
-    # Otherwise, take best action according to Q-table at the current state
-    else :
-
-        print("Q-table based action")
-
-        action_index = np.argmax(q_table[state_index, :])
-        best_action = ACTIONS[action_index]
-
-        print(f"Q-value of best action: {q_table[state_index, action_index]}")
-
-        # Goes to section of Q-table where state is relevant, goes through all actions and gives index of action with maximum Q-value
-        return best_action, action_index
-
 def main():
 
     size = 5        # inner grid
@@ -57,11 +25,11 @@ def main():
     # creates agent, the seed value here make random repeatable ACTIONS
     agent = RandomAgent(seed=1)
 
-    num_episodes = 100  # number of episodes to run training loop
+    num_episodes = 100    # number of episodes to run training loop
     max_steps = 100       # max step count
     delay_s = 0.1         # delay for each step sp we can see it move
 
-    episode_return = 0.0 # total points this round
+    episode_return = 0 # total points this round/episode
 
     # parameters for training agent
 
@@ -97,6 +65,7 @@ def main():
     for episode in range(num_episodes):
 
         done = False
+        episode_return = 0
 
         state, state_index = env.reset() # put agent in grid
 
@@ -113,14 +82,14 @@ def main():
             Repeat 
             """
             clear()
-            print('Episode', episode)
+            print('Episode', (episode + 1))
             print(f"\nStep {step+1}/{max_steps}")
             env.render()
 
             # action = agent.act(state)
 
             # choose action (testing with q_table)
-            action, action_index = choose_action(env, agent, state, state_index, q_table, epsilon)
+            action, action_index = env.choose_action(agent, state, state_index, q_table, epsilon)
 
             # applies action (testing with q-table)
             next_state, reward, done = env.step(action)

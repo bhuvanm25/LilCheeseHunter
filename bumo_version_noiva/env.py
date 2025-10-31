@@ -2,7 +2,6 @@
 import random
 import gymnasium as gym
 import numpy as np
-import math
 
 WALL  = '⬛'
 EMPTY = '🟥'
@@ -42,10 +41,10 @@ class GridWorld(gym.Env):
         num_actions = 4
 
         # dictionary that maps each state to an action
-        self.P = {
-            state: {action: [] for action in range(num_actions)}
-            for state in range(num_states)
-        }
+        # self.P = {
+        #     state: {action: [] for action in range(num_actions)}
+        #     for state in range(num_states)
+        # }
 
         # Define what the agent can observe
         self.observation_space = gym.spaces.Discrete(num_states)
@@ -126,3 +125,40 @@ class GridWorld(gym.Env):
         print(f"State index: {a}")      # TESTING
 
         return a
+    
+    # Chooses action depending on given state (should move to ENV class)
+    def choose_action(self, agent, state, state_index, q_table, epsilon):
+
+        # Generates random value to see what action to take
+
+        # If random value generated is less than epsilon, take random action
+        if (random.uniform(0, 1) < epsilon):
+
+            # gets random action (repeatable sequence of random actions)
+            # rand_action = agent.act(state)
+            # action_index = ACTIONS.index(rand_action)
+
+            print("Random action")
+
+            # Using random.sample() function to generate random action
+            # action_index = env.action_space.sample()
+            # rand_action = ACTIONS[action_index]
+
+            # Using agent seed to randomize actions (repeatable)
+            rand_action = agent.act(state)
+            action_index = ACTIONS.index(rand_action)
+
+            return rand_action, action_index
+        
+        # Otherwise, take best action according to Q-table at the current state
+        else :
+
+            print("Q-table based action")
+
+            action_index = np.argmax(q_table[state_index, :])
+            best_action = ACTIONS[action_index]
+
+            print(f"Q-value of best action: {q_table[state_index, action_index]}")
+
+            # Goes to section of Q-table where state is relevant, goes through all actions and gives index of action with maximum Q-value
+            return best_action, action_index
