@@ -67,8 +67,8 @@ class GridWorld:
         done = (self.agent_pos == self.treat_pos)
 
         #reward
-        # +1 if cheese found
-        # -0.01 each step
+        # +100 if cheese found
+        # -1 each step
         if done:
             reward = 100
         else:
