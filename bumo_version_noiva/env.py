@@ -2,14 +2,17 @@
 import random
 import gymnasium as gym
 import numpy as np
+import itertools
 
 WALL  = '⬛'
 EMPTY = '🟥'
 AGENT = '🐭'               # jerry
 TREAT = '🧀'               # cheese
 MOVING_TRAP = '😾'         # tom
-MOUSE_TRAP = '🪤'          # mouse trap
+MOUSE_TRAP = '🪤 '         # mouse trap
 POISON_TRAP = '🍇'         # mouse poison
+DEATH_TRAP = '☠️'          # mouse death
+HOME = '🏠'               # mouse home
 
 # Actions agent can choose to take
 ACTIONS = ['UP', 'DOWN', 'LEFT', 'RIGHT']
@@ -37,7 +40,25 @@ class GridWorld(gym.Env):
         self.agent_pos = None  # (r, c)
 
         # MY TESTING WITH GYMNASIUM
-        num_states = size * size    # for now, may change later as game becomes more complex
+
+        # testing with treats that can disappear once eaten (preparing for multiple treats)
+        num_treats = 2
+        treat_states = 2
+
+        self.treats_bitstring = self.bitGen(num_treats)
+
+        self.treat_list = list()
+
+        for i in range(num_treats):
+            self.treat_list.append("treat" + str(i))
+        
+        # self.treat_list_status = [1] * num_treats                               # not sure which one I want to use
+        self.treat_dict_status = dict.fromkeys(self.treat_list, 1)       # note, as of python 3.7, dicts are ordered based on insertion
+
+        # may want to create dictionary to map position of treats to treat to make code shorter later
+
+        num_states = (self.size * self.size) * (pow(treat_states, num_treats))        # for now, may change later as game becomes more complex
+        # num_states = (self.size * self.size)                                                  # number of states for v1
         num_actions = 4
 
         # dictionary that maps each state to an action
@@ -71,13 +92,23 @@ class GridWorld(gym.Env):
         # Force the agent to spawn at top-left corner (1,1)
         self.agent_pos = (1, 1)
 
-        # Place treat at bottom-right corner (rows-2, cols-2)
-        self.treat_pos = (self.rows - 2, self.cols - 2)
+        # Place home in bottom-left corner (self,rows - 2, 1)
+        self.home_pos = (self.rows - 2, 1)
 
-        # Place trap at around middle of grid
+        # Place treat0 at top-right corner (rows-2, cols-2)
+        self.treat0_pos = (1, self.cols - 2)
+
+        # Place treat1 at bottom-right corner (rows-2, cols-2)
+        self.treat1_pos = (self.rows - 2, self.cols - 2)
+
+        # Place trap at around middle of grid (3,3)
         self.trap_pos = (3, 3)
 
-        return self.agent_pos, self.coord_to_state(self.agent_pos)
+        # Reset treat status to 1
+        for key, value in self.treat_dict_status.items():
+            self.treat_dict_status[key] = 1
+
+        return self.agent_pos, self.coord_to_state()
 
     def step(self, action):
         
@@ -88,22 +119,39 @@ class GridWorld(gym.Env):
 
         # check boundary / wall
         if self.grid[nr][nc] != WALL:
-            self.agent_pos = (nr, nc)
+            self.agent_pos = (nr, nc)       # updates agent's position
 
-        # at cheese?
-        done = (self.agent_pos == self.treat_pos)
+        # get cheese?
+        # done = (self.agent_pos == self.treat_pos)
+        eat_cheese0 = False
+        if (self.treat_dict_status['treat0'] == 1):
+            eat_cheese0 = (self.agent_pos == self.treat0_pos)
+
+        eat_cheese1 = False
+        if (self.treat_dict_status['treat1'] == 1):
+            eat_cheese1 = (self.agent_pos == self.treat1_pos)
+
+        # reach home?
+        done = (self.agent_pos == self.home_pos)
 
         # hit trap?
         hit_trap = (self.agent_pos == self.trap_pos)
 
         #reward
         # +100 if cheese found
+        # +1 if reached home
         # -1 each step
         # -25 for hitting trap
 
-        if done:
+        if eat_cheese0:
+            self.treat_dict_status['treat0'] = 0
             reward = 100
-        elif hit_trap:          # TESTING
+        elif eat_cheese1:      # simplify this later
+            self.treat_dict_status['treat1'] = 0
+            reward = 100
+        elif done:
+            reward = 1
+        elif hit_trap:          
             reward = -25
         else:
             reward = -1
@@ -120,27 +168,60 @@ class GridWorld(gym.Env):
 
                 if (r, c) == self.agent_pos:
                     line.append(AGENT)
-                elif (r, c) == getattr(self, 'treat_pos', None):
-                    line.append(TREAT)
-                elif (r, c) == getattr(self, 'trap_pos', None):           # TESTING
-                    line.append(POISON_TRAP)
+
+                elif (r, c) == getattr(self, 'treat0_pos', None):
+                    if (self.treat_dict_status['treat0'] == 1):
+                        line.append(TREAT)
+                    else:
+                        line.append(self.grid[r][c])
+
+                elif (r, c) == getattr(self, 'treat1_pos', None):
+                    if (self.treat_dict_status['treat1'] == 1):
+                        line.append(TREAT)
+                    else:
+                        line.append(self.grid[r][c])
+
+                elif (r, c) == getattr(self, 'trap_pos', None):           
+                    line.append(MOUSE_TRAP)
+
+                elif (r, c) == getattr(self, 'home_pos', None):
+                    line.append(HOME)
+
                 else:
                     line.append(self.grid[r][c])
 
             print(" ".join(line))
 
-    def coord_to_state(self, agent_pos):
-        
-        r, c = agent_pos
+    def bitGen(self, n):
+        return list(itertools.product([0, 1], repeat=n))
 
+    def coord_to_state(self):
+        
+        r, c = self.agent_pos       # gets position of agent
+
+        # adjusts r, c to range from 0 to 4
         r -= 1
         c -= 1
 
-        a = (r * (self.cols - 2)) + c
+        treats_status = list()      # create list to store status of each treat
 
-        print(f"State index: {a}")      # TESTING
+        # loop through dictionary values and add to list
+        for value in self.treat_dict_status.values():
+            treats_status.append(value)
 
-        return a
+        treats_status = tuple(treats_status)    # convert list to tuple
+
+        treats_status_index = self.treats_bitstring.index(treats_status)      # gets index of current status of treats
+
+        index_adjuster = treats_status_index * (self.size * self.size)        # calculates index adjuster, groups range of states by size of grid (currently 5x5)
+
+        a = (r * (self.size)) + c
+
+        # TESTING
+        print(f"State index: {a + index_adjuster}")      
+        print(f"Treats status tuple: {treats_status}")
+
+        return a + index_adjuster
     
     # Chooses action depending on given state (should move to ENV class)
     def choose_action(self, agent, state, state_index, q_table, epsilon):
@@ -154,7 +235,7 @@ class GridWorld(gym.Env):
             # rand_action = agent.act(state)
             # action_index = ACTIONS.index(rand_action)
 
-            print("Random action")
+            print("Random action")     
 
             # Using random.sample() function to generate random action
             # action_index = env.action_space.sample()
@@ -169,12 +250,12 @@ class GridWorld(gym.Env):
         # Otherwise, take best action according to Q-table at the current state
         else :
 
-            print("Q-table based action")
+            print("Q-table based action")       
 
+            # Goes to section of Q-table where state is relevant, goes through all actions and gives index of action with maximum Q-value
             action_index = np.argmax(q_table[state_index, :])
             best_action = ACTIONS[action_index]
 
             print(f"Q-value of best action: {q_table[state_index, action_index]}")
 
-            # Goes to section of Q-table where state is relevant, goes through all actions and gives index of action with maximum Q-value
             return best_action, action_index

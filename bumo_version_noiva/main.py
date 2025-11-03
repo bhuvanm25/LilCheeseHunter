@@ -24,7 +24,7 @@ def main():
 
     num_episodes = 100    # number of episodes to run training loop
     max_steps = 100       # max step count
-    delay_s = 0.1         # delay for each step sp we can see it move
+    delay_s = 0.01         # delay for each step sp we can see it move
 
     episode_return = 0 # total points this round/episode
 
@@ -83,8 +83,6 @@ def main():
             print(f"\nStep {step+1}/{max_steps}")
             env.render()
 
-            # action = agent.act(state)
-
             # choose action (testing with q_table)
             action, action_index = env.choose_action(agent, state, state_index, q_table, epsilon)
 
@@ -92,9 +90,9 @@ def main():
             next_state, reward, done = env.step(action)
 
             # get next state index
-            next_state_index = env.coord_to_state(next_state)
+            next_state_index = env.coord_to_state()
 
-            # updates q-table (testing)
+            # updates q-table
             old_value = q_table[state_index, action_index]               # Gets Q-value of table at the specific state we currently are at and for the specific action we currently took 
             next_max = np.max(q_table[next_state_index, :])              # Gets max Q-value/best action of next state (after we took the action)
 
@@ -116,7 +114,7 @@ def main():
             print(f"Total: {episode_return}")
 
             if done:
-                print("CHEESE FOUND. Round over!")
+                print("🧀 HOME REACHED. Round over!")
                 print(f"Final Score: {episode_return}")
                 break
 
