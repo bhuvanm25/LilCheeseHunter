@@ -1,0 +1,8 @@
+States
+
+(mouse_pos (r,c), cheese_states (_,_,_,_,_), cheese1_pos (r,c), cheese1_pos2 (r,c), cheese3_pos (r,c), cheese4_pos (r,c), cheese5_pos (r,c), trap_states (_,_,_,_,_), trap1_pos (r,c), …, trap5_pos (r,c), house_pos(r,c))
+
+	• hard code 5 random positions cheese can be at
+	• hard code 5 positions trap can be at
+	• hard code where mouse can start
+	• hard code where house can start
