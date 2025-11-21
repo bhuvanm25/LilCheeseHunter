@@ -7,7 +7,7 @@ to run
 python navigation.pyw
 ```
 
-or simply double click
+or simply double click the file
 ```
 .runme.bat
 ```
