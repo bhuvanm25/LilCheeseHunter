@@ -328,7 +328,7 @@ def interactive_loop(env, agent, viewer):
                 running = False
 
 
-def select_map_pygame(maps_dir: str, candidates: list[str]) -> str:
+def select_map_pygame(maps_dir: str, candidates: list[str]) -> str | None:
     pygame.init()
     width, height = 600, 400
     screen = pygame.display.set_mode((width, height))
@@ -343,7 +343,8 @@ def select_map_pygame(maps_dir: str, candidates: list[str]) -> str:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.display.quit()
-                raise SystemExit("Map selection cancelled by user.")
+                return None
+
             elif event.type == pygame.KEYDOWN:
                 if event.key in (pygame.K_DOWN, pygame.K_s):
                     selected_idx = (selected_idx + 1) % len(candidates)
@@ -351,10 +352,15 @@ def select_map_pygame(maps_dir: str, candidates: list[str]) -> str:
                     selected_idx = (selected_idx - 1) % len(candidates)
                 elif event.key in (pygame.K_RETURN, pygame.K_SPACE):
                     running = False
+                elif event.key == pygame.K_ESCAPE:
+                    pygame.display.quit()
+                    return None
+
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mx, my = event.pos
                 line_h = 40
                 margin_top = 60
+
                 for i, name in enumerate(candidates):
                     y = margin_top + i * line_h
                     rect = pygame.Rect(40, y - 10, width - 80, line_h - 5)
@@ -363,10 +369,15 @@ def select_map_pygame(maps_dir: str, candidates: list[str]) -> str:
                         running = False
                         break
 
+                back_rect = pygame.Rect(40, height - 60, 120, 36)
+                if back_rect.collidepoint(mx, my):
+                    pygame.display.quit()
+                    return None
+
         screen.fill((20, 20, 30))
 
         title = font.render(
-            "Select a map (↑/↓ or click, Enter/Space to confirm)",
+            "Select a map (↑/↓, Enter/Space, Esc = Back)",
             True,
             (255, 255, 255),
         )
@@ -386,6 +397,16 @@ def select_map_pygame(maps_dir: str, candidates: list[str]) -> str:
 
             text = font.render(f"[{i}] {name}", True, (255, 255, 255))
             screen.blit(text, (50, y))
+
+        back_rect = pygame.Rect(40, height - 60, 120, 36)
+        pygame.draw.rect(screen, (60, 120, 200), back_rect, border_radius=6)
+        pygame.draw.rect(screen, (230, 230, 240), back_rect, 1, border_radius=6)
+        back_label = font.render("Back", True, (0, 0, 0))
+        screen.blit(
+            back_label,
+            (back_rect.centerx - back_label.get_width() // 2,
+             back_rect.centery - back_label.get_height() // 2),
+        )
 
         pygame.display.flip()
         clock.tick(30)
@@ -541,7 +562,12 @@ def main():
         raise SystemExit(f"No .json maps found in ./{maps_dir}")
 
     map_path = select_map_pygame(maps_dir, candidates)
+    if map_path is None:
+        print("User cancelled map selection — returning to navigation.")
+        return
+
     map_name = os.path.splitext(os.path.basename(map_path))[0]
+
 
     print(f"[Info] Loaded map: {map_path}")
     env = GridWorld.from_json(map_path, seed=0)

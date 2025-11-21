@@ -59,10 +59,7 @@ def load_map(path):
     for row in g:
         new_row = []
         for v in row:
-            if v == 4:    
-                v = 2     
-            elif v == 5:    
-                v = 4     
+ 
             if v not in PALETTE:
                 v = 0      
             new_row.append(v)
@@ -100,6 +97,8 @@ class Viewer:
         self.is_panning = False
         self.pan_anchor = (0, 0)
         self.cam_anchor = (0.0, 0.0)
+
+        self.back_rect = None
 
         self.fit_to_view()
 
@@ -168,7 +167,7 @@ class Viewer:
             "F     : fit to view",
             "R     : reset zoom",
             "G     : grid on/off",
-            "Esc   : quit",
+            "Esc   : back to Map Tools",
         ]:
             y = line(y, s)
         y += 8
@@ -185,6 +184,27 @@ class Viewer:
                 (r.right + 8, y - 2)
             )
             y += row_h
+
+        self.back_rect = None
+
+        btn_h = 36
+        btn_w = panel.width - 24
+        bx = x0 + 12
+        by = self.win_h - btn_h - 16
+        back_rect = pg.Rect(bx, by, btn_w, btn_h)
+
+        pg.draw.rect(self.screen, (60, 120, 200), back_rect, border_radius=8)
+        pg.draw.rect(self.screen, (240, 240, 250), back_rect, 1, border_radius=8)
+
+        label = self.font_small.render("Back to Map Tools", True, (5, 5, 10))
+        self.screen.blit(
+            label,
+            (back_rect.centerx - label.get_width() // 2,
+             back_rect.centery - label.get_height() // 2),
+        )
+
+        self.back_rect = back_rect
+
 
     def draw_map(self):
         pg.draw.rect(self.screen, BG, self.viewport)
@@ -248,10 +268,20 @@ class Viewer:
                 elif e.type == pg.MOUSEWHEEL:
                     mx, my = pg.mouse.get_pos()
                     self.zoom_at(mx, my, 1.1 if e.y > 0 else 1/1.1)
-                elif e.type == pg.MOUSEBUTTONDOWN and e.button == 2:
-                    self.is_panning = True
-                    self.pan_anchor = e.pos
-                    self.cam_anchor = (self.cam_x, self.cam_y)
+                elif e.type == pg.MOUSEBUTTONDOWN:
+                    if e.button == 1:
+                        if self.back_rect and self.back_rect.collidepoint(e.pos):
+                            running = False  
+                        else:
+                            pass
+                    elif e.button == 2:
+                        self.is_panning = True
+                        self.pan_anchor = e.pos
+                        self.cam_anchor = (self.cam_x, self.cam_y)
+
+                    elif e.button == 3:
+                        pass
+
                 elif e.type == pg.MOUSEBUTTONUP and e.button == 2:
                     self.is_panning = False
                 elif e.type == pg.MOUSEMOTION and self.is_panning:
@@ -276,50 +306,103 @@ class Viewer:
         pg.quit()
 
 def run_picker_and_view():
-    items = list_maps() 
+    items = list_maps()
     if not items:
         print("No valid map JSONs found in cleaned/, raw/ or current folder.")
         return
+
     pg.init()
     font = pg.font.SysFont("consolas", 16)
     screen = pg.display.set_mode((760, 520))
     pg.display.set_caption("Select a TreatQuest map (Enter to open)")
-    sel, offset = 0, 0
+
+    sel = 0
+    offset = 0
     running = True
+
     while running:
-        screen.fill((20,20,24))
-        title = font.render("Select a map (Up/Down, Enter, Esc) — preferring [cleaned]", True, (240,240,250))
+        screen.fill((20, 20, 24))
+
+        title = font.render(
+            "Select a map (Up/Down, Enter, Esc/Back) — preferring [cleaned]",
+            True,
+            (240, 240, 250),
+        )
         screen.blit(title, (16, 12))
 
-        visible = 18
-        start = offset
-        end = min(start + visible, len(items))
-        y = 52
-        for i in range(start, end):
-            label, path = items[i]
-            row = pg.Rect(16, y, 720, 24)
-            if i == sel:
-                pg.draw.rect(screen, (70,90,120), row, border_radius=4)
-            screen.blit(font.render(label, True, (235,235,245)), (row.x + 8, row.y + 3))
-            y += 26
+        top_y = 52
+        line_h = 24
+        max_visible = (screen.get_height() - top_y - 70) // line_h
+        visible = min(max_visible, len(items))
+
+        if sel < offset:
+            offset = sel
+        if sel >= offset + visible:
+            offset = sel - visible + 1
+
+        for i in range(visible):
+            idx = offset + i
+            label, path = items[idx]
+            y = top_y + i * line_h
+
+            if idx == sel:
+                pg.draw.rect(
+                    screen,
+                    (60, 80, 130),
+                    pg.Rect(10, y - 2, screen.get_width() - 20, line_h + 4),
+                    border_radius=4,
+                )
+                color = (255, 255, 255)
+            else:
+                color = (190, 190, 200)
+
+            text_surf = font.render(label, True, color)
+            screen.blit(text_surf, (20, y))
+
+        back_rect = pg.Rect(16, screen.get_height() - 48, 120, 30)
+        pg.draw.rect(screen, (60, 120, 200), back_rect, border_radius=6)
+        pg.draw.rect(screen, (230, 230, 240), back_rect, 1, border_radius=6)
+        back_label = font.render("Back", True, (0, 0, 0))
+        screen.blit(
+            back_label,
+            (back_rect.centerx - back_label.get_width() // 2,
+             back_rect.centery - back_label.get_height() // 2),
+        )
+
         pg.display.flip()
 
         for e in pg.event.get():
             if e.type == pg.QUIT:
-                pg.quit(); return
+                pg.quit()
+                return
+
             elif e.type == pg.KEYDOWN:
                 if e.key == pg.K_ESCAPE:
-                    pg.quit(); return
+                    pg.quit()
+                    return
                 elif e.key == pg.K_UP:
                     sel = max(0, sel - 1)
-                    if sel < offset: offset = sel
                 elif e.key == pg.K_DOWN:
-                    sel = min(len(items)-1, sel + 1)
-                    if sel >= offset + visible: offset = sel - visible + 1
-                elif e.key == pg.K_RETURN:
+                    sel = min(len(items) - 1, sel + 1)
+                elif e.key in (pg.K_RETURN, pg.K_SPACE):
+                    path = items[sel][1]
                     pg.quit()
-                    Viewer(items[sel][1]).loop()
+                    Viewer(path).loop()
                     return
+
+            elif e.type == pg.MOUSEBUTTONDOWN and e.button == 1:
+                if back_rect.collidepoint(e.pos):
+                    pg.quit()
+                    return
+
+                click_x, click_y = e.pos
+                if top_y <= click_y < top_y + visible * line_h:
+                    row = (click_y - top_y) // line_h
+                    idx = offset + row
+                    if 0 <= idx < len(items):
+                        sel = idx
+
+
 
 if __name__ == "__main__":
     if len(sys.argv) == 2 and os.path.isfile(sys.argv[1]):

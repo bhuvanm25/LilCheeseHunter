@@ -118,40 +118,12 @@ def load_map_from(path):
         row = g_raw[y]
         for x in range(copy_w):
             v = row[x]
-            if v == 4:  
-                v = 2
-            elif v == 5:   
-                v = 4
             if v not in PALETTE:
                 v = DEFAULT_TILE
             canvas[y][x] = v
 
     print(f"loaded {path} ({w}x{h}) → placed into {MAP_W}x{MAP_H}")
     return canvas
-
-pg.init()
-screen = pg.display.set_mode((WIN_W, WIN_H))
-pg.display.set_caption("TreatQuest Map Editor")
-clock = pg.time.Clock()
-font = pg.font.SysFont("consolas", 16)
-font_small = pg.font.SysFont("consolas", 14)
-
-grid = new_map(MAP_W, MAP_H)
-current_tile = 1
-
-cam_x, cam_y = 0.0, 0.0     
-zoom = 1.0
-show_grid = True
-
-mode = "edit"
-typed_name = "" 
-load_list = []   
-load_sel = 0
-scroll_offset = 0 
-
-banner_msg   = ""
-banner_color = (200, 60, 60)
-banner_ttl   = 0.0
 
 def set_banner(msg, kind="error", duration=4.0):
     global banner_msg, banner_color, banner_ttl
@@ -248,7 +220,7 @@ def draw_sidebar():
         "R          : reset view",
         "S          : save",
         "L          : load",
-        "Esc        : quit",
+        "Esc        : back to Map Tools",
         "",
         "Rules for cleaned map:",
         "- Solid rectangle (no 0s)",
@@ -314,8 +286,9 @@ def draw_sidebar():
     btn_rects = {
         "save": draw_button("Save"),
         "load": draw_button("Load"),
-        "exit": draw_button("Exit"),
+        "exit": draw_button("Back to Map Tools"),
     }
+
 
     return pal_rects, btn_rects
 
@@ -432,16 +405,44 @@ def draw(dt):
     return pal_rects, btn_rects
 
 def main():
+    global screen, clock, font, font_small
     global cam_x, cam_y, zoom, current_tile, show_grid, mode
     global typed_name, load_list, load_sel, scroll_offset
+    global grid, banner_msg, banner_color, banner_ttl
+
+    if not pg.get_init():
+        pg.init()
+
+    screen = pg.display.set_mode((WIN_W, WIN_H))
+    pg.display.set_caption("TreatQuest Map Editor")
+    clock = pg.time.Clock()
+    font = pg.font.SysFont("consolas", 16)
+    font_small = pg.font.SysFont("consolas", 14)
+
+    grid = new_map(MAP_W, MAP_H)
+    current_tile = 1
+
+    cam_x, cam_y = 0.0, 0.0
+    zoom = 1.0
+    show_grid = True
+
+    mode = "edit"
+    typed_name = ""
+    load_list = []
+    load_sel = 0
+    scroll_offset = 0
+
+    banner_msg = ""
+    banner_color = (200, 60, 60)
+    banner_ttl = 0.0
 
     running = True
     pal_rects = []
 
     btn_rects = {
-        "save": pg.Rect(0,0,0,0),
-        "load": pg.Rect(0,0,0,0),
-        "exit": pg.Rect(0,0,0,0),
+        "save": pg.Rect(0, 0, 0, 0),
+        "load": pg.Rect(0, 0, 0, 0),
+        "exit": pg.Rect(0, 0, 0, 0),
     }
 
     while running:
@@ -450,6 +451,7 @@ def main():
         for e in pg.event.get():
             if e.type == pg.QUIT:
                 running = False
+                break
 
             if mode == "save_prompt":
                 if e.type == pg.KEYDOWN:
@@ -466,7 +468,7 @@ def main():
                         zero_found = False
                         home_count = 0
                         floor_count = 0
-                        trap_count  = 0
+                        trap_count = 0
 
                         for row in trimmed:
                             for v in row:
@@ -500,7 +502,6 @@ def main():
                             typed_name = ""
                             mode = "edit"
                             continue
-
 
                         total = floor_count + trap_count + home_count
                         limit = math.ceil(math.sqrt(total))
@@ -545,7 +546,8 @@ def main():
                         mode = "edit"
                     elif e.key in (pg.K_UP, pg.K_k):
                         load_sel = max(0, load_sel - 1)
-                        if load_sel < scroll_offset: scroll_offset = load_sel
+                        if load_sel < scroll_offset:
+                            scroll_offset = load_sel
                     elif e.key in (pg.K_DOWN, pg.K_j):
                         load_sel = min(len(load_list) - 1, load_sel + 1)
                         visible = 16
@@ -583,17 +585,18 @@ def main():
                             else:
                                 load_sel = idx
                             main._last_click_t = pg.time.get_ticks()
-                    elif e.button in (4, 5): 
+                    elif e.button in (4, 5):
                         visible = 16
                         delta = -1 if e.button == 4 else 1
                         max_start = max(0, len(load_list) - visible)
                         scroll_offset = clamp(scroll_offset + delta, 0, max_start)
 
-                continue  
+                continue
 
             if e.type == pg.KEYDOWN:
                 if e.key == pg.K_ESCAPE:
                     running = False
+                    break
                 elif e.key == pg.K_g:
                     show_grid = not show_grid
                 elif pg.K_0 <= e.key <= pg.K_9:
@@ -638,6 +641,9 @@ def main():
                         elif btn_rects["exit"].collidepoint(mx, my):
                             pg.event.post(pg.event.Event(pg.QUIT))
 
+        if not running or not pg.display.get_surface():
+            break
+
         keys = pg.key.get_pressed()
         move = PAN_SPEED * dt / max(zoom, 1e-6)
         if keys[pg.K_LEFT]:  cam_x -= move
@@ -657,7 +663,7 @@ def main():
                         for yy in range(MAP_H):
                             for xx in range(MAP_W):
                                 if grid[yy][xx] == 4:
-                                    grid[yy][xx] = 2 
+                                    grid[yy][xx] = 2
                         grid[ty][tx] = 4
                     else:
                         grid[ty][tx] = current_tile
@@ -667,7 +673,7 @@ def main():
         pal_rects, btn_rects = draw(dt)
 
     pg.quit()
-    sys.exit()
+    return
 
 if __name__ == "__main__":
     main()

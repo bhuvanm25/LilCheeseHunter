@@ -1,99 +1,121 @@
-import os, sys, subprocess, platform
 import pygame as pg
 
-EDITOR = "editor.py"
-VIEWER = "viewer.py"
+import editor
+import viewer
 
-def run_script(script, args=None, new_console=False):
-    if not os.path.exists(script):
-        return f"Missing: {script}"
+APP_W, APP_H = 1200, 800
 
-    cmd = [sys.executable, script]  
-    if args:
-        cmd.extend(args)        
+BG         = (22, 22, 26)
+BTN_BASE   = (44, 48, 60)
+BTN_HOVER  = (70, 90, 130)
+BTN_TEXT   = (235, 235, 245)
+BTN_BORDER = (95, 100, 120)
+TEXT_SUB   = (210, 210, 220)
 
-    try:
-        if new_console and platform.system() == "Windows":
-            CREATE_NEW_CONSOLE = 0x00000010
-            subprocess.Popen(cmd, creationflags=CREATE_NEW_CONSOLE)
-        else:
-            subprocess.Popen(cmd)    
-        return f"Launched: {script}"
-    except Exception as e:
-        return f"Failed to launch {script}: {e}"
 
-pg.init()
-W, H = 520, 300                        
-screen = pg.display.set_mode((W, H))
-pg.display.set_caption("TreatQuest — Launcher")
+def map_menu_screen() -> str:
+    pg.init()
+    screen = pg.display.set_mode((APP_W, APP_H))
+    pg.display.set_caption("TreatQuest — Map Tools")
 
-font = pg.font.SysFont("consolas", 18)
-font_big = pg.font.SysFont("consolas", 26)
-BG = (22, 22, 26) 
+    font_title = pg.font.SysFont("consolas", 32)
+    font_btn   = pg.font.SysFont("consolas", 28)
+    font_small = pg.font.SysFont("consolas", 20)
 
-def draw_button(rect, label, hotkey=None, enabled=True, hover=False):
-    base = (44, 48, 60) if enabled else (32, 34, 40)   
-    hi   = (70, 90, 130)                             
-    col = hi if (hover and enabled) else base
-    pg.draw.rect(screen, col, rect, border_radius=10)
-    pg.draw.rect(screen, (95, 100, 120), rect, 1, border_radius=10)
+    clock = pg.time.Clock()
 
-    text = label if not hotkey else f"{label}  [{hotkey}]"
-    tx = font_big.render(text, True, (235, 235, 245))
-    screen.blit(tx, (rect.x + 16, rect.y + rect.height//2 - tx.get_height()//2))
+    pad_x = 60
+    btn_w = APP_W - pad_x * 2
+    btn_h = 70
+    start_y = 180
+    gap = 20
 
-def exists(p):
-    return os.path.exists(p)
+    btn_create = pg.Rect(pad_x, start_y, btn_w, btn_h)
+    btn_view   = pg.Rect(pad_x, start_y + (btn_h + gap), btn_w, btn_h)
+    btn_back   = pg.Rect(pad_x, start_y + 2 * (btn_h + gap), btn_w, btn_h)
 
-def main():
-    status = "Select an option."    
+    choice = "back"
     running = True
-    pad = 22                            
-    bw, bh = W - pad*2, 64              
-    y0 = 90                              
-    btn_create = pg.Rect(pad, y0, bw, bh)
-    btn_view   = pg.Rect(pad, y0 + bh + pad, bw, bh)
 
     while running:
-        screen.fill(BG)
-        title = font_big.render("Map Tools", True, (240, 240, 250))
-        screen.blit(title, (pad, 24))
-
-        mx, my = pg.mouse.get_pos()
-
-        hov_create = btn_create.collidepoint(mx, my)
-        hov_view   = btn_view.collidepoint(mx, my)
-
-        draw_button(btn_create, "Create Map", "C / 1", enabled=exists(EDITOR),  hover=hov_create)
-        draw_button(btn_view,   "View Map",   "V / 2", enabled=exists(VIEWER),  hover=hov_view)
-
-        st = font.render(status, True, (210, 210, 220))
-        screen.blit(st, (pad, H - 36))
-
-        pg.display.flip()
-
         for e in pg.event.get():
             if e.type == pg.QUIT:
+                choice = "back"
                 running = False
 
             elif e.type == pg.KEYDOWN:
-                k = e.key
-                if k in (pg.K_ESCAPE, pg.K_q):
+                if e.key in (pg.K_ESCAPE, pg.K_q):
+                    choice = "back"
+                    running = False
+                elif e.key in (pg.K_c, pg.K_1):
+                    choice = "editor"
+                    running = False
+                elif e.key in (pg.K_v, pg.K_2):
+                    choice = "viewer"
+                    running = False
+                elif e.key in (pg.K_b, pg.K_3):
+                    choice = "back"
                     running = False
 
-                elif k in (pg.K_c, pg.K_1) and exists(EDITOR):
-                    status = run_script(EDITOR)
-
-                elif k in (pg.K_v, pg.K_2) and exists(VIEWER):
-                    status = run_script(VIEWER)
-
             elif e.type == pg.MOUSEBUTTONDOWN and e.button == 1:
-                if btn_create.collidepoint(e.pos) and exists(EDITOR):
-                    status = run_script(EDITOR)
-                elif btn_view.collidepoint(e.pos) and exists(VIEWER):
-                    status = run_script(VIEWER)
+                if btn_create.collidepoint(e.pos):
+                    choice = "editor"
+                    running = False
+                elif btn_view.collidepoint(e.pos):
+                    choice = "viewer"
+                    running = False
+                elif btn_back.collidepoint(e.pos):
+                    choice = "back"
+                    running = False
 
-    pg.quit()
+        mx, my = pg.mouse.get_pos()
+        screen.fill(BG)
+
+        title = font_title.render("Map Tools", True, BTN_TEXT)
+        screen.blit(title, (pad_x, 80))
+
+        hint = font_small.render(
+            "Create maps or view existing ones. Close windows to return here.",
+            True,
+            TEXT_SUB,
+        )
+        screen.blit(hint, (pad_x, 120))
+
+        def draw_button(rect, label):
+            hovered = rect.collidepoint(mx, my)
+            col = BTN_HOVER if hovered else BTN_BASE
+            pg.draw.rect(screen, col, rect, border_radius=10)
+            pg.draw.rect(screen, BTN_BORDER, rect, 1, border_radius=10)
+
+            txt = font_btn.render(label, True, BTN_TEXT)
+            screen.blit(
+                txt,
+                (rect.x + 20, rect.y + rect.height // 2 - txt.get_height() // 2),
+            )
+
+        draw_button(btn_create, "Create Map  [C / 1]")
+        draw_button(btn_view,   "View Map    [V / 2]")
+        draw_button(btn_back,   "Back to Launcher  [Esc / B / 3]")
+
+        pg.display.flip()
+        clock.tick(60)
+
+    return choice
+
+
+def main():
+    while True:
+        choice = map_menu_screen()
+
+        if choice == "editor":
+            editor.main()
+
+        elif choice == "viewer":
+            viewer.run_picker_and_view()
+
+        else: 
+            break
+
 
 if __name__ == "__main__":
     main()

@@ -46,36 +46,33 @@ class GridWorld:
         cols = len(grid_codes[0])
         env = cls(rows, cols, seed)
 
-        homes = []
-        cheeses = []
-        traps = set()
+        homes: list[tuple[int, int]] = []
+        traps: set[tuple[int, int]] = set()
+        cheeses: list[tuple[int, int]] = []  
 
         for r in range(rows):
             for c in range(cols):
                 code = grid_codes[r][c]
 
-                if code in (0, 1):
+                if code == 1:
                     env.grid[r][c] = WALL
-                elif code == 2:
+                else:
                     env.grid[r][c] = EMPTY
-                elif code == 3:
-                    env.grid[r][c] = EMPTY
+
+                if code == 3:        
                     traps.add((r, c))
                 elif code == 4:
-                    env.grid[r][c] = EMPTY
-                    cheeses.append((r, c))
-                elif code == 5:
-                    env.grid[r][c] = EMPTY
                     homes.append((r, c))
 
         env._homes = homes
         env._cheeses = cheeses
         env._traps = traps
 
-        env.home_pos = homes[0]
+        env.home_pos = homes[0] if homes else None
         env.cheese_mask = env._full_cheese_mask()
 
         return env
+
 
     def set_home(self, idx):
         self.home_pos = self._homes[idx]
