@@ -490,15 +490,17 @@ def main():
 
                         if home_count != 1:
                             if home_count == 0:
-                                set_banner("Cannot save: must have exactly 1 home.", "error")
+                                set_banner("Cannot save: MUST HAVE 1 home tile.", "error")
                             else:
+                                extra_homes = home_count - 1
                                 set_banner(
-                                    f"Cannot save: must have exactly 1 home (you have {home_count}).",
+                                    f"Cannot save: too many homes — can only have 1, remove {extra_homes}.",
                                     "error"
                                 )
                             typed_name = ""
                             mode = "edit"
                             continue
+
 
                         total = floor_count + trap_count + home_count
                         limit = math.ceil(math.sqrt(total))
