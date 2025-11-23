@@ -18,8 +18,7 @@ def trim_rows_cols(grid):
     cols_to_keep = [i for i in range(len(g[0])) if any(row[i] != 0 for row in g)]
     if not cols_to_keep:
         return []
-    return [[row[i] for row in cols_to_keep] for row in g]
-
+    return [[r[i] for i in cols_to_keep] for r in g]
 
 # Map size in tiles
 MAP_W, MAP_H   = 50, 50
@@ -768,3 +767,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
