@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Lil Cheese Hunter™</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Lil Cheese Hunter™ – A Pygame + RL playground where a tiny mouse learns to hunt cheese through trap-filled mazes you design." />
+
+  <!-- Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #050611;
+      --bg-card: #111423;
+      --accent: #ffb347;
+      --accent-2: #71e6ff;
+      --text-main: #f5f7ff;
+      --text-soft: #c3c7e8;
+      --border-subtle: rgba(255,255,255,0.06);
+      --radius-lg: 20px;
+      --shadow-soft: 0 20px 45px rgba(0,0,0,0.7);
+      --max-width: 1120px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: "JetBrains Mono", system-ui;
+      background: radial-gradient(circle at top, #151a2f, #050611 60%, #020208);
+      color: var(--text-main);
+    }
+
+    .page { min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* NAV */
+    header {
+      position: sticky; top: 0; z-index: 20;
+      backdrop-filter: blur(18px);
+      background: linear-gradient(to bottom, rgba(5,6,17,.96), rgba(5,6,17,.75), transparent);
+      border-bottom: 1px solid rgba(255,255,255,.02);
+    }
+
+    .nav {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 14px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    .brand-title { font-size: 1.05rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+    .brand-tagline { font-size: .75rem; color: var(--text-soft); }
+
+    .nav-links a {
+      padding: 4px 8px;
+      text-decoration: none;
+      color: var(--text-soft);
+      border-radius: 999px;
+      transition: 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--accent-2);
+      background: rgba(113,230,255,.08);
+    }
+
+    .pill {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.1);
+      font-size: .75rem;
+      background: rgba(255,255,255,.03);
+      color: var(--text-soft);
+    }
+
+    .pill-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #4ade80;
+      box-shadow: 0 0 12px rgba(74,222,128,.9);
+    }
+
+    /* HERO */
+    .hero { padding: 40px 20px 80px; }
+    .hero-inner { max-width: var(--max-width); margin: 0 auto; display: grid; grid-template-columns: 1fr; }
+
+    .hero-kicker {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(113,230,255,.3);
+      color: var(--accent-2);
+      background: rgba(113,230,255,.06);
+      margin-bottom: 12px;
+      font-size: .8rem;
+    }
+
+    .hero-title {
+      font-size: clamp(2.4rem, 4vw, 3.4rem);
+      margin: 0 0 12px;
+      line-height: 1.08;
+    }
+
+    .hero-title span.accent {
+      background: linear-gradient(120deg, #ffb347, #ff6a88, #71e6ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: .98rem;
+      line-height: 1.6;
+      max-width: 36rem;
+      color: var(--text-soft);
+      margin-bottom: 20px;
+    }
+
+    .hero-bullets { list-style: none; padding: 0; margin: 0 0 24px; }
+    .hero-bullets li { display: flex; gap: 8px; margin-bottom: 8px; color: var(--text-soft); }
+    .hero-bullets li::before { content: "◆"; color: var(--accent-2); font-size: .7rem; }
+
+    .hero-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    .btn-primary {
+      padding: 10px 18px;
+      background: linear-gradient(135deg, #ffb347, #ff6a88);
+      color: #050611;
+      border-radius: 999px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-ghost {
+      padding: 10px 18px;
+      border: 1px solid rgba(255,255,255,.15);
+      background: rgba(255,255,255,.03);
+      border-radius: 999px;
+      color: var(--text-soft);
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .hero-meta span {
+      padding: 6px 10px;
+      display: inline-block;
+      border-radius: 999px;
+      font-size: .78rem;
+      color: var(--text-soft);
+      border: 1px solid rgba(255,255,255,.06);
+      background: rgba(113,230,255,.08);
+      margin-right: 6px;
+      margin-top: 10px;
+    }
+
+    /* CARDS & SECTIONS */
+    .section-inner { max-width: var(--max-width); margin: 0 auto; }
+    .section-header { margin-bottom: 24px; }
+    .section-title { margin-bottom: 4px; font-size: 1.5rem; }
+    .section-subtitle { color: var(--text-soft); font-size: .9rem; max-width: 28rem; }
+
+    .feature-grid {
+      display: grid; gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(240px,1fr));
+    }
+
+    .card {
+      background: var(--bg-card);
+      padding: 18px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-soft);
+    }
+    .card.highlight {
+      background: radial-gradient(circle at top, rgba(113,230,255,.2), rgba(5,6,17,.95));
+      border-color: rgba(113,230,255,.6);
+    }
+
+    .card h3 { margin: 0 0 8px; }
+    .card p { color: var(--text-soft); line-height: 1.6; }
+
+    /* FOOTER */
+    footer {
+      padding: 20px;
+      color: var(--text-soft);
+      border-top: 1px solid rgba(255,255,255,.06);
+      background: linear-gradient(to bottom, rgba(4,5,15,.96), #020308);
+    }
+
+    .footer-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .footer-links span {
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.06);
+      background: rgba(10,13,31,.9);
+    }
+  </style>
+</head>
+
+<body>
+<div class="page">
+
+  <!-- NAV -->
+  <header>
+    <div class="nav">
+      <div class="nav-left">
+        <div>
+          <div class="brand-title">Lil Cheese Hunter™</div>
+          <div class="brand-tagline">A tiny RL mouse lab in one app</div>
+        </div>
+      </div>
+
+      <div class="nav-right">
+        <div class="nav-links">
+          <a href="#overview">Overview</a>
+          <a href="#features">Features</a>
+          <a href="#under-the-hood">How it works</a>
+          <a href="#workflow">Workflow</a>
+          <a href="#stack">Tech Stack</a>
+          <a href="#download">Source</a>
+          <a href="#credits">Credits</a>
+        </div>
+
+        <div class="pill">
+          <span class="pill-dot"></span>
+          <span>Q-learning engine online</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <main>
+    <section class="hero" id="overview">
+      <div class="hero-inner">
+        <div>
+          <div class="hero-kicker">Interactive reinforcement learning</div>
+
+          <h1 class="hero-title">
+            Teach a tiny mouse to hunt
+            <span class="accent">cheese in trap-filled mazes</span>.
+          </h1>
+
+          <p class="hero-subtitle">
+            <strong>Lil Cheese Hunter™</strong> is a Python + Pygame playground where a Q-learning
+            mouse learns to navigate custom maps you design. Create puzzle-like levels,
+            train an RL brain, and watch your mouse adapt and learn.
+          </p>
+
+          <ul class="hero-bullets">
+            <li>Build custom maps with walls, traps, and home.</li>
+            <li>Train a Q-learning mouse across every safe tile.</li>
+            <li>Observe training in real-time with stats & controls.</li>
+          </ul>
+
+          <div class="hero-actions">
+            <button class="btn-primary" onclick="document.getElementById('workflow').scrollIntoView({behavior: 'smooth'})">
+              ▶ How to Run
+            </button>
+
+            <button class="btn-ghost" onclick="document.getElementById('under-the-hood').scrollIntoView({behavior: 'smooth'})">
+              RL Details
+            </button>
+          </div>
+
+          <div class="hero-meta">
+            <span>GridWorld environment</span>
+            <span>Q-learning exploration</span>
+            <span>Pygame UI suite</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features">
+      <div class="section-inner">
+        <div class="section-header">
+          <h2 class="section-title">What’s inside Lil Cheese Hunter™</h2>
+          <p class="section-subtitle">A modular RL toolkit built around experimentation.</p>
+        </div>
+
+        <div class="feature-grid">
+          <div class="card highlight">
+            <h3>GridWorld Environment</h3>
+            <p>Handles walls, traps, home tiles, movement, and rewards. Every safe tile becomes a training target.</p>
+          </div>
+
+          <div class="card">
+            <h3>Q-learning Engine</h3>
+            <p>Tabular Q-learning with ε-greedy exploration, episodic training, and persistent Q-table saving.</p>
+          </div>
+
+          <div class="card">
+            <h3>Pygame Viewer</h3>
+            <p>Watch training live with movement animations, stats, and adjustable FPS.</p>
+          </div>
+
+          <div class="card">
+            <h3>Map Editor</h3>
+            <p>Design maps visually. Enforces valid shapes and ensures exactly one home tile.</p>
+          </div>
+
+          <div class="card">
+            <h3>Launcher Menu</h3>
+            <p>A simple hub to start training, open map tools, or quit.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section id="under-the-hood">
+      <div class="section-inner">
+        <h2 class="section-title">How it works</h2>
+        <p class="section-subtitle">Lil Cheese Hunter™ uses classic Q-learning to teach navigation through hazards.</p>
+
+        <div class="feature-grid">
+          <div class="card">
+            <h3>State Representation</h3>
+            <p>State = (agent_row, agent_col, goal_row, goal_col)</p>
+          </div>
+
+          <div class="card">
+            <h3>Rewards</h3>
+            <p>Step = –1, Trap = –100, Goal = +100 to +200, Wall bumps give extra penalty.</p>
+          </div>
+
+          <div class="card">
+            <h3>Q-learning Loop</h3>
+            <p>ε-greedy action → step → reward → Bellman update.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WORKFLOW -->
+    <section id="workflow">
+      <div class="section-inner">
+        <h2 class="section-title">Workflow</h2>
+
+        <div class="feature-grid">
+          <div class="card">
+            <h3>1 — Create a Map</h3>
+            <p>Use the Pygame editor to paint your maze. Save as a cleaned JSON map.</p>
+          </div>
+
+          <div class="card">
+            <h3>2 — Train the Mouse</h3>
+            <p>Select a map, choose train vs reuse Q-table, and watch the mouse learn.</p>
+          </div>
+
+          <div class="card">
+            <h3>3 — Explore</h3>
+            <p>Click any tile to set it as a goal. The mouse follows its learned policy.</p>
+          </div>
+
+          <div class="card">
+            <h3>4 — Iterate</h3>
+            <p>Change the map, reward shaping, or hyperparameters to compare behaviors.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TECH STACK -->
+    <section id="stack">
+      <div class="section-inner">
+        <h2 class="section-title">Tech Stack</h2>
+
+        <div class="feature-grid">
+          <div class="card"><h3>Python</h3><p>Core logic, RL, environment.</p></div>
+          <div class="card"><h3>Pygame</h3><p>Rendering, input, UI windows.</p></div>
+          <div class="card"><h3>NumPy + Matplotlib</h3><p>Logging, training curves, analysis.</p></div>
+          <div class="card"><h3>JSON Maps</h3><p>Lightweight, easy to edit and version-control.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DOWNLOAD / SOURCE -->
+    <section id="download">
+      <div class="section-inner">
+        <div class="section-header">
+          <h2 class="section-title">Download the Source</h2>
+          <p class="section-subtitle">
+            Grab the full Lil Cheese Hunter™ source code, explore the modules, and tweak the project however you like.
+          </p>
+        </div>
+
+        <div class="feature-grid">
+          <div class="card highlight">
+            <h3>GitHub Repository</h3>
+            <p>
+              The complete project — environment, agent, viewer, editor, and launcher — lives on GitHub.
+              Clone it, fork it, or use it as a base for your own RL experiments.
+            </p>
+            <a
+              class="btn-primary"
+              href="https://github.com/bhuvanm25/LilCheeseHunter.git"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              ⬇ View on GitHub
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CREDITS -->
+    <section id="credits">
+      <div class="section-inner">
+        <h2 class="section-title">Credits</h2>
+
+        <div class="feature-grid">
+          <div class="card highlight">
+            <h3>Special Thanks</h3>
+            <p>Thanks to <strong>prototyp3</strong> for providing the project foundation.</p>
+          </div>
+
+          <div class="card">
+            <h3>Developed By — Team Chinchilla</h3>
+            <p>
+              • Bhuvan<br>
+              • Joseph<br>
+              • Noiva<br>
+              • Tasha
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <span>Lil Cheese Hunter™ — Reinforcement Learning Playground.</span>
+      <div class="footer-links">
+        <span>Python</span>
+        <span>Pygame</span>
+        <span>RL</span>
+        <span>Team Chinchilla</span>
+      </div>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
