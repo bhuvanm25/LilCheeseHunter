@@ -133,6 +133,8 @@
       border: none;
       font-weight: 600;
       cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
     }
 
     .btn-ghost {
@@ -142,6 +144,8 @@
       border-radius: 999px;
       color: var(--text-soft);
       cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
     }
 
     .hero-meta span {
@@ -156,7 +160,7 @@
       margin-top: 10px;
     }
 
-    /* CARDS */
+    /* CARDS & SECTIONS */
     .section-inner { max-width: var(--max-width); margin: 0 auto; }
     .section-header { margin-bottom: 24px; }
     .section-title { margin-bottom: 4px; font-size: 1.5rem; }
@@ -190,9 +194,24 @@
       background: linear-gradient(to bottom, rgba(4,5,15,.96), #020308);
     }
 
+    .footer-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
     .footer-links span {
       padding: 4px 8px;
-      margin-right: 6px;
       border-radius: 999px;
       border: 1px solid rgba(255,255,255,.06);
       background: rgba(10,13,31,.9);
@@ -207,7 +226,6 @@
   <header>
     <div class="nav">
       <div class="nav-left">
-        <!-- orb removed -->
         <div>
           <div class="brand-title">Lil Cheese Hunter™</div>
           <div class="brand-tagline">A tiny RL mouse lab in one app</div>
@@ -221,6 +239,7 @@
           <a href="#under-the-hood">How it works</a>
           <a href="#workflow">Workflow</a>
           <a href="#stack">Tech Stack</a>
+          <a href="#download">Source</a>
           <a href="#credits">Credits</a>
         </div>
 
@@ -236,7 +255,6 @@
   <main>
     <section class="hero" id="overview">
       <div class="hero-inner">
-
         <div>
           <div class="hero-kicker">Interactive reinforcement learning</div>
 
@@ -273,7 +291,6 @@
             <span>Pygame UI suite</span>
           </div>
         </div>
-
       </div>
     </section>
 
@@ -382,13 +399,42 @@
       </div>
     </section>
 
+    <!-- DOWNLOAD / SOURCE -->
+    <section id="download">
+      <div class="section-inner">
+        <div class="section-header">
+          <h2 class="section-title">Download the Source</h2>
+          <p class="section-subtitle">
+            Grab the full Lil Cheese Hunter™ source code, explore the modules, and tweak the project however you like.
+          </p>
+        </div>
+
+        <div class="feature-grid">
+          <div class="card highlight">
+            <h3>GitHub Repository</h3>
+            <p>
+              The complete project — environment, agent, viewer, editor, and launcher — lives on GitHub.
+              Clone it, fork it, or use it as a base for your own RL experiments.
+            </p>
+            <a
+              class="btn-primary"
+              href="https://github.com/bhuvanm25/LilCheeseHunter.git"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              ⬇ View on GitHub
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- CREDITS -->
     <section id="credits">
       <div class="section-inner">
         <h2 class="section-title">Credits</h2>
 
         <div class="feature-grid">
-
           <div class="card highlight">
             <h3>Special Thanks</h3>
             <p>Thanks to <strong>prototyp3</strong> for providing the project foundation.</p>
@@ -403,7 +449,6 @@
               • Tasha
             </p>
           </div>
-
         </div>
       </div>
     </section>
